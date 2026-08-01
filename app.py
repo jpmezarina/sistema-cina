@@ -10,6 +10,7 @@ from datetime import datetime, date
 import os
 import uuid
 import json
+import random
 
 from config import Config
 from models import db, Usuario, Turno, TurnoEstudiante, TutorEstudiante, Procedimiento, NotaEstudiante, Asistencia, CodigoAcceso, LogActividad
@@ -325,6 +326,72 @@ def admin_codigos():
 
     codigos = CodigoAcceso.query.order_by(CodigoAcceso.fecha_creacion.desc()).all()
     return render_template('admin_codigos.html', codigos=codigos)
+
+
+# Lista de estudiantes para importación masiva (edítala según tu clase real)
+ESTUDIANTES_IMPORTAR = [
+    "AGUIRRE ARROYO", "ANCALLA TARQUI", "ARIZA SOLIS", "AROCUTIPA CHOQUEHUANCA",
+    "ATOCHE ANICAMA", "BERROCAL SALVATIERRA", "BRAVO SAMAME", "CABALLERO HUAMANTALLA",
+    "CABRERA VELA", "CADILLO LAURA", "CALLALLI FLORES", "CANALES LOYOLA",
+    "CARRILLO PAULINO", "CHAFLOQUE OSORIO", "CHAPOÑAN ARROYO", "CHICANA BECERRA",
+    "CHICO ORMEÑO", "CHOQUEHUANCA OBREGON", "CIPRIAN MENESES", "ESPINOZA PAISIG",
+    "EVANGELISTA PARRA", "GAMA CCAPA", "GOMEZ RAMIREZ", "HERNÁNDEZ FARFÁN",
+    "LAVADO BASILIO", "LEYVA MARIÑO", "MATTA CARRANZA", "MEDINA GARCIA",
+    "MINAYA CADILLO", "ORTEGA TORRES", "OSORIO ALEGRIA", "PALOMINO CARRILLO",
+    "PAUCAR PEÑA", "PEREZ CONDOR", "PUMACHAGUA LUQUE", "RAMOS AREVALO",
+    "ROMERO ACOSTA", "SALVADOR SANTILLANA", "SANABRIA HUERTA", "SUÁREZ QUISPE",
+    "TERREL JUAN DE DIOS", "TOCTO FACUNDO", "TORRES AGUIRRE", "USCUVILCA CABRERA",
+    "VILCHEZ ARTEAGA", "VILLANO ÑUFLO", "ZAMORA DEL CARPIO",
+]
+
+
+def generar_password_temporal():
+    alfabeto = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # sin 0/O/1/l ambiguos
+    return ''.join(random.choice(alfabeto) for _ in range(8))
+
+
+@app.route('/admin/importar-estudiantes', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_importar_estudiantes():
+    if request.method == 'POST':
+        creados = []
+        omitidos = []
+        for apellidos in ESTUDIANTES_IMPORTAR:
+            apellidos = apellidos.strip()
+            existente = Usuario.query.filter_by(apellidos=apellidos, rol='estudiante').first()
+            if existente:
+                omitidos.append(apellidos)
+                continue
+
+            codigo = generar_codigo_unico('estudiante')
+            while Usuario.query.filter_by(codigo_acceso=codigo).first():
+                codigo = generar_codigo_unico('estudiante')
+            password = generar_password_temporal()
+
+            estudiante = Usuario(
+                codigo_acceso=codigo, nombres='', apellidos=apellidos,
+                rol='estudiante', activo=True,
+            )
+            estudiante.set_password(password)
+            db.session.add(estudiante)
+            creados.append({'apellidos': apellidos, 'codigo': codigo, 'password': password})
+
+        db.session.commit()
+        registrar_log('Importación masiva de estudiantes', f'Creados: {len(creados)}, Omitidos: {len(omitidos)}')
+        if creados:
+            flash(f'Se crearon {len(creados)} cuenta(s) de estudiante. Copia las credenciales antes de salir de esta página.', 'success')
+        if omitidos:
+            flash(f'{len(omitidos)} ya existían y se omitieron: {", ".join(omitidos)}', 'warning')
+        return render_template('admin_importar_resultado.html', creados=creados)
+
+    total_en_lista = len(ESTUDIANTES_IMPORTAR)
+    ya_existentes = Usuario.query.filter(
+        Usuario.rol == 'estudiante', Usuario.apellidos.in_(ESTUDIANTES_IMPORTAR)
+    ).count()
+    return render_template('admin_importar_estudiantes.html',
+                            total_en_lista=total_en_lista, ya_existentes=ya_existentes,
+                            lista=ESTUDIANTES_IMPORTAR)
 
 @app.route('/admin/usuarios')
 @login_required
