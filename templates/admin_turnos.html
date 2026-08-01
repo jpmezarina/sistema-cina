@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Asignar Turnos - CINA{% endblock %}
+{% block page_title %}Asignación de Turnos{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-white"><h5 class="mb-0">Asignar Turno a Estudiante</h5></div>
+            <div class="card-body">
+                {% if estudiantes %}
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Estudiante sin turno</label>
+                        <select name="estudiante_id" class="form-select" required>
+                            {% for e in estudiantes %}<option value="{{ e.id }}">{{ e.nombre_completo }} ({{ e.codigo_acceso }})</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Turno</label>
+                        <select name="turno_id" class="form-select" required>
+                            {% for t in turnos %}<option value="{{ t.id }}">{{ t.nombre }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-calendar-check me-2"></i>Asignar Turno</button>
+                </form>
+                {% else %}
+                <p class="text-muted mb-0">Todos los estudiantes tienen turno asignado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Estudiantes Asignados</h5>
+                <span class="badge bg-primary">{{ asignaciones|length }} total</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Estudiante</th><th>Turno</th><th>Fecha</th></tr></thead>
+                    <tbody>
+                        {% for a in asignaciones %}
+                        <tr>
+                            <td>{{ a.estudiante.nombre_completo }}</td>
+                            <td><span class="badge bg-info">{{ a.turno.nombre }}</span></td>
+                            <td class="small text-muted">{{ a.fecha_asignacion.strftime('%d/%m/%Y') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center text-muted py-4">Sin asignaciones aún</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Validar Procedimientos - CINA{% endblock %}
+{% block page_title %}Validación de Procedimientos{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header bg-white"><h5 class="mb-0">Procedimientos de Mis Estudiantes</h5></div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Fecha Reg.</th><th>Estudiante</th><th>Turno</th><th>Tratamiento</th><th>Fecha Proc.</th><th>Paciente</th><th>Evidencia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody>
+                    {% for p in procedimientos %}
+                    <tr class="{{ 'table-warning' if p.estado == 'pendiente' else 'table-success' if p.estado == 'validado' else 'table-danger' }}">
+                        <td>{{ p.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ p.estudiante_obj.nombre_completo }}</td>
+                        <td>{{ p.turno.nombre if p.turno else '-' }}</td>
+                        <td><strong>{{ p.tratamiento_codigo }}</strong></td>
+                        <td>{{ p.fecha_realizacion.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ p.paciente_nombre or '-' }} <small class="text-muted">({{ p.paciente_edad or '?' }} años)</small></td>
+                        <td>{% if p.evidencia_filename %}<a href="{{ url_for('static', filename='uploads/evidencias/' + p.evidencia_filename) }}" target="_blank" class="btn btn-sm btn-outline-info"><i class="bi bi-file-earmark"></i> Ver</a>{% else %}-{% endif %}</td>
+                        <td><span class="badge badge-{{ p.estado }}">{{ p.estado.upper() }}</span></td>
+                        <td>
+                            {% if p.estado == 'pendiente' %}
+                            <form method="POST" class="d-inline">
+                                <input type="hidden" name="procedimiento_id" value="{{ p.id }}">
+                                <input type="hidden" name="accion" value="validar">
+                                <input type="text" name="comentario" class="form-control form-control-sm mb-1" placeholder="Comentario">
+                                <button type="submit" class="btn btn-sm btn-success w-100">Validar</button>
+                            </form>
+                            <form method="POST" class="d-inline mt-1">
+                                <input type="hidden" name="procedimiento_id" value="{{ p.id }}">
+                                <input type="hidden" name="accion" value="rechazar">
+                                <button type="submit" class="btn btn-sm btn-outline-danger w-100">Rechazar</button>
+                            </form>
+                            {% else %}<small class="text-muted">{{ p.comentario_docente or 'Sin comentarios' }}</small>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Panel Administrador - CINA{% endblock %}
+{% block page_title %}Panel de Administración{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card info p-3">
+            <h6 class="text-muted text-uppercase small">Estudiantes</h6>
+            <h3 class="mb-0">{{ stats.total_estudiantes }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card success p-3">
+            <h6 class="text-muted text-uppercase small">Tutores</h6>
+            <h3 class="mb-0">{{ stats.total_tutores }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card warning p-3">
+            <h6 class="text-muted text-uppercase small">Proc. Pendientes</h6>
+            <h3 class="mb-0">{{ stats.proc_pendientes }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card danger p-3">
+            <h6 class="text-muted text-uppercase small">Códigos Disponibles</h6>
+            <h3 class="mb-0">{{ stats.codigos_disponibles }}</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Últimos Procedimientos Registrados</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr><th>Fecha</th><th>Estudiante</th><th>Tratamiento</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for p in ultimos_procedimientos %}
+                        <tr>
+                            <td>{{ p.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ p.estudiante_obj.nombre_completo }}</td>
+                            <td>{{ p.tratamiento_codigo }}</td>
+                            <td><span class="badge badge-{{ p.estado }}">{{ p.estado.upper() }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted">Sin registros</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Actividad Reciente</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for log in ultimos_logs %}
+                    <li class="list-group-item px-0 py-2 small">
+                        <strong>{{ log.accion }}</strong><br>
+                        <span class="text-muted">{{ log.detalle or '-' }}</span><br>
+                        <small class="text-muted">{{ log.fecha.strftime('%d/%m %H:%M') }}</small>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

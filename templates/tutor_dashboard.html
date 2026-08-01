@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Panel Tutor - CINA{% endblock %}
+{% block page_title %}Mis Estudiantes Asignados{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+    {% for item in estudiantes %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ item.usuario.nombre_completo }}</h5>
+                <p class="text-muted small mb-2">Código: {{ item.usuario.codigo_acceso }}</p>
+                <div class="row text-center g-2 mb-3">
+                    <div class="col-4"><div class="border rounded p-2"><div class="h5 mb-0 text-success">{{ item.stats.procedimientos_validados }}</div><small class="text-muted">Validados</small></div></div>
+                    <div class="col-4"><div class="border rounded p-2"><div class="h5 mb-0 text-warning">{{ item.stats.procedimientos_pendientes }}</div><small class="text-muted">Pendientes</small></div></div>
+                    <div class="col-4"><div class="border rounded p-2"><div class="h5 mb-0 text-danger">{{ item.stats.procedimientos_rechazados }}</div><small class="text-muted">Rechazados</small></div></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Nota Final: <strong class="{{ 'semaforo-rojo' if item.stats.nota_final < 10.5 else 'semaforo-verde' }}">{{ "%.2f"|format(item.stats.nota_final) }}</strong></span>
+                    <a href="{{ url_for('tutor_validar') }}" class="btn btn-sm btn-primary">Validar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% if proc_pendientes %}
+<div class="card">
+    <div class="card-header bg-white"><h5 class="mb-0">Procedimientos Pendientes de Validación</h5></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Fecha</th><th>Estudiante</th><th>Tratamiento</th><th>Paciente</th><th>Acción</th></tr></thead>
+            <tbody>
+                {% for p in proc_pendientes %}
+                <tr>
+                    <td>{{ p.fecha_realizacion.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ p.estudiante_obj.nombre_completo }}</td>
+                    <td><span class="badge bg-info">{{ p.tratamiento_codigo }}</span></td>
+                    <td>{{ p.paciente_nombre or '-' }}</td>
+                    <td><a href="{{ url_for('tutor_validar') }}" class="btn btn-sm btn-success">Validar</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

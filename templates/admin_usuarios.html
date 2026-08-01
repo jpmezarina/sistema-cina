@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Usuarios - CINA{% endblock %}
+{% block page_title %}Gestión de Usuarios{% endblock %}
+{% block content %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="d-flex gap-2">
+            <select name="rol" class="form-select w-auto" onchange="this.form.submit()">
+                <option value="">Todos los roles</option>
+                <option value="admin" {% if rol_filtro == 'admin' %}selected{% endif %}>Administrador</option>
+                <option value="docente_responsable" {% if rol_filtro == 'docente_responsable' %}selected{% endif %}>Docente Responsable</option>
+                <option value="tutor" {% if rol_filtro == 'tutor' %}selected{% endif %}>Tutor</option>
+                <option value="estudiante" {% if rol_filtro == 'estudiante' %}selected{% endif %}>Estudiante</option>
+            </select>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lista de Usuarios</h5>
+        <span class="badge bg-primary">{{ usuarios|length }} total</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Código</th><th>Nombre Completo</th><th>Email</th><th>Rol</th><th>Estado</th><th>Registro</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for u in usuarios %}
+                    <tr>
+                        <td><code>{{ u.codigo_acceso }}</code></td>
+                        <td>{{ u.nombre_completo }}</td>
+                        <td class="text-muted small">{{ u.email or '-' }}</td>
+                        <td><span class="badge bg-secondary">{{ u.rol }}</span></td>
+                        <td>{% if u.activo %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-danger">Inactivo</span>{% endif %}</td>
+                        <td class="small">{{ u.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin_toggle_usuario', id=u.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm {{ 'btn-outline-danger' if u.activo else 'btn-outline-success' }}" {% if u.id == current_user.id %}disabled{% endif %}>
+                                    {{ 'Desactivar' if u.activo else 'Activar' }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">Sin usuarios registrados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
