@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Asistencias - CINA{% endblock %}
+{% block page_title %}Registro de Asistencias{% endblock %}
+{% block content %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small">Turno</label>
+                <select name="turno_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">Seleccionar turno...</option>
+                    {% for t in turnos %}<option value="{{ t.id }}" {% if turno_id == t.id %}selected{% endif %}>{{ t.nombre }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small">Fecha</label>
+                <input type="date" name="fecha" class="form-control" value="{{ fecha_filtro }}" onchange="this.form.submit()">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if turno_id and asistencias %}
+<form method="POST">
+    <input type="hidden" name="turno_id" value="{{ turno_id }}">
+    <input type="hidden" name="fecha" value="{{ fecha_filtro }}">
+    <div class="card">
+        <div class="card-header bg-white"><h5 class="mb-0">Marcar Asistencia — {{ fecha_filtro }}</h5></div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Estudiante</th><th width="220">Estado</th><th>Observación</th><th width="90" class="text-center">Presente</th><th width="90" class="text-center">Faltas</th></tr></thead>
+                    <tbody>
+                        {% for item in asistencias %}
+                        <tr>
+                            <td>{{ item.estudiante.nombre_completo }}</td>
+                            <td>
+                                <select name="estado_{{ item.estudiante.id }}" class="form-select form-select-sm">
+                                    {% set estado_actual = item.asistencia.estado if item.asistencia else 'presente' %}
+                                    <option value="presente" {% if estado_actual == 'presente' %}selected{% endif %}>Presente</option>
+                                    <option value="ausente" {% if estado_actual == 'ausente' %}selected{% endif %}>Ausente</option>
+                                    <option value="tardanza" {% if estado_actual == 'tardanza' %}selected{% endif %}>Tardanza</option>
+                                    <option value="justificado" {% if estado_actual == 'justificado' %}selected{% endif %}>Justificado</option>
+                                </select>
+                            </td>
+                            <td><input type="text" name="observacion_{{ item.estudiante.id }}" class="form-control form-control-sm" value="{{ item.asistencia.observacion if item.asistencia else '' }}"></td>
+                            <td class="text-center"><span class="badge bg-success">{{ item.total_presente }}</span></td>
+                            <td class="text-center"><span class="badge bg-danger">{{ item.total_ausente }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Guardar Asistencias</button>
+        </div>
+    </div>
+</form>
+{% elif turno_id %}
+<div class="alert alert-info">No hay estudiantes asignados a este turno.</div>
+{% else %}
+<div class="alert alert-secondary">Selecciona un turno y una fecha para registrar asistencias.</div>
+{% endif %}
+{% endblock %}

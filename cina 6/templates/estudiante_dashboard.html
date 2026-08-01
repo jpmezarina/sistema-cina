@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Mi Record - CINA{% endblock %}
+{% block page_title %}Mi Record Clínico{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card success p-3"><h6 class="text-muted text-uppercase small">Proc. Validados</h6><h3 class="mb-0">{{ stats.procedimientos_validados }}</h3></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card warning p-3"><h6 class="text-muted text-uppercase small">Pendientes</h6><h3 class="mb-0">{{ stats.procedimientos_pendientes }}</h3></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card info p-3"><h6 class="text-muted text-uppercase small">Nota Clínica</h6><h3 class="mb-0">{{ "%.2f"|format(stats.nota_clinica) }}</h3></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card p-3 {{ 'bg-danger text-white' if stats.nota_final < 10.5 else 'bg-success text-white' if stats.nota_final >= 13 else '' }}">
+            <h6 class="text-uppercase small opacity-75">Nota Final</h6>
+            <h3 class="mb-0">{{ "%.2f"|format(stats.nota_final) }}</h3>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Progreso por Tratamiento</h5>
+                <span class="badge bg-primary">{{ turno.turno.nombre if turno else 'Sin turno asignado' }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    {% for t in tratamientos %}
+                    {% set data = conteo_tratamientos[t.codigo] %}
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between small mb-1"><strong>{{ t.codigo }}</strong><span class="text-muted">{{ data.validados }}/{{ t.requerido }} ({{ "%.2f"|format(data.puntos) }} pts)</span></div>
+                        <div class="treatment-progress">
+                            <div class="progress-bar bg-{{ 'success' if data.validados >= t.requerido else 'primary' }}" role="progressbar" style="width: {{ (data.validados / t.requerido * 100)|int }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header bg-white"><h5 class="mb-0">Últimos Procedimientos</h5></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Fecha</th><th>Tratamiento</th><th>Paciente</th><th>Estado</th></tr></thead>
+                    <tbody>
+                        {% for p in ultimos_procedimientos %}
+                        <tr><td>{{ p.fecha_realizacion.strftime('%d/%m/%Y') }}</td><td>{{ p.tratamiento_codigo }}</td><td>{{ p.paciente_nombre or '-' }}</td><td><span class="badge badge-{{ p.estado }}">{{ p.estado.upper() }}</span></td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-white"><h5 class="mb-0">Mis Notas</h5></div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between px-0"><span>Nota Clínica (70%)</span><strong>{{ "%.2f"|format(notas.nota_clinica or 0) if notas else '0.00' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between px-0"><span>Caso Clínico (10%)</span><strong>{{ "%.2f"|format(notas.nota_caso_clinico or 0) if notas else '0.00' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between px-0"><span>Actitudinal (10%)</span><strong>{{ "%.2f"|format(notas.nota_actitudinal or 0) if notas else '0.00' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between px-0"><span>Trabajo Acad. (10%)</span><strong>{{ "%.2f"|format(notas.nota_trabajo_academico or 0) if notas else '0.00' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between px-0 border-top pt-2 mt-2"><span class="h6 mb-0">NOTA FINAL</span><strong class="h5 mb-0 {{ 'text-danger' if (notas.nota_final or 0) < 10.5 else 'text-success' }}">{{ "%.2f"|format(notas.nota_final or 0) if notas else '0.00' }}</strong></li>
+                </ul>
+            </div>
+        </div>
+        <div class="d-grid gap-2">
+            <a href="{{ url_for('estudiante_registrar_proc') }}" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Registrar Procedimiento</a>
+            <a href="{{ url_for('estudiante_asistencias') }}" class="btn btn-outline-secondary"><i class="bi bi-calendar-check me-2"></i>Ver Asistencias</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

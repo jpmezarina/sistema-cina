@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Códigos Generados - CINA{% endblock %}
+{% block page_title %}Códigos Generados{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Nuevos Códigos para el rol: <span class="badge bg-secondary">{{ rol }}</span></h5>
+        <a href="{{ url_for('admin_codigos') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>Se generaron {{ codigos|length }} código(s) correctamente. Compártelos con los usuarios correspondientes.</div>
+        <div class="row g-2">
+            {% for c in codigos %}
+            <div class="col-md-4 col-lg-3">
+                <div class="border rounded p-2 text-center">
+                    <code class="fs-6">{{ c }}</code>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

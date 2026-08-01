@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Mis Asistencias - CINA{% endblock %}
+{% block page_title %}Mi Historial de Asistencias{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card success p-3 text-center"><h3 class="mb-0">{{ total_presente }}</h3><small class="text-muted text-uppercase">Asistencias</small></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card danger p-3 text-center"><h3 class="mb-0">{{ total_ausente }}</h3><small class="text-muted text-uppercase">Faltas</small></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card warning p-3 text-center"><h3 class="mb-0">{{ total_tardanza }}</h3><small class="text-muted text-uppercase">Tardanzas</small></div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header bg-white"><h5 class="mb-0">Registro Detallado</h5></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Fecha</th><th>Turno</th><th>Estado</th><th>Observación</th></tr></thead>
+            <tbody>
+                {% for a in asistencias %}
+                <tr>
+                    <td>{{ a.fecha.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ a.turno.nombre }}</td>
+                    <td><span class="badge bg-{{ 'success' if a.estado == 'presente' else 'danger' if a.estado == 'ausente' else 'warning text-dark' }}">{{ a.estado.upper() }}</span></td>
+                    <td class="text-muted">{{ a.observacion or '-' }}</td>
+                </tr>
+                {% else %}<tr><td colspan="4" class="text-center text-muted py-4">Sin registros de asistencia</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
