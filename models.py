@@ -32,8 +32,8 @@ class Usuario(UserMixin, db.Model):
     asistencias = db.relationship('Asistencia', backref='estudiante_obj', lazy='dynamic', foreign_keys='Asistencia.estudiante_id')
     notas = db.relationship('NotaEstudiante', backref='estudiante_obj', uselist=False, cascade='all, delete-orphan', foreign_keys='NotaEstudiante.estudiante_id')
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    def set_password(self, password, method='scrypt'):
+        self.password_hash = generate_password_hash(password, method=method)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)

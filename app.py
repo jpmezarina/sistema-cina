@@ -355,29 +355,42 @@ def generar_password_temporal():
 @admin_required
 def admin_importar_estudiantes():
     if request.method == 'POST':
-        creados = []
-        omitidos = []
-        for apellidos in ESTUDIANTES_IMPORTAR:
-            apellidos = apellidos.strip()
-            existente = Usuario.query.filter_by(apellidos=apellidos, rol='estudiante').first()
-            if existente:
-                omitidos.append(apellidos)
-                continue
+        try:
+            # Precarga en 2 consultas (en vez de ~90) para que sea rápido incluso en hosting gratuito
+            existentes = {
+                u.apellidos for u in
+                Usuario.query.filter_by(rol='estudiante')
+                .filter(Usuario.apellidos.in_(ESTUDIANTES_IMPORTAR)).all()
+            }
+            codigos_en_uso = {c for (c,) in Usuario.query.with_entities(Usuario.codigo_acceso).all()}
 
-            codigo = generar_codigo_unico('estudiante')
-            while Usuario.query.filter_by(codigo_acceso=codigo).first():
+            creados = []
+            omitidos = []
+            for apellidos in ESTUDIANTES_IMPORTAR:
+                apellidos = apellidos.strip()
+                if apellidos in existentes:
+                    omitidos.append(apellidos)
+                    continue
+
                 codigo = generar_codigo_unico('estudiante')
-            password = generar_password_temporal()
+                while codigo in codigos_en_uso:
+                    codigo = generar_codigo_unico('estudiante')
+                codigos_en_uso.add(codigo)
+                password = generar_password_temporal()
 
-            estudiante = Usuario(
-                codigo_acceso=codigo, nombres='', apellidos=apellidos,
-                rol='estudiante', activo=True,
-            )
-            estudiante.set_password(password)
-            db.session.add(estudiante)
-            creados.append({'apellidos': apellidos, 'codigo': codigo, 'password': password})
+                estudiante = Usuario(
+                    codigo_acceso=codigo, nombres='', apellidos=apellidos,
+                    rol='estudiante', activo=True,
+                )
+                estudiante.set_password(password, method='pbkdf2:sha256:20000')
+                db.session.add(estudiante)
+                creados.append({'apellidos': apellidos, 'codigo': codigo, 'password': password})
 
-        db.session.commit()
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ocurrió un error al importar: {e}', 'danger')
+            return redirect(url_for('admin_importar_estudiantes'))
         registrar_log('Importación masiva de estudiantes', f'Creados: {len(creados)}, Omitidos: {len(omitidos)}')
         if creados:
             flash(f'Se crearon {len(creados)} cuenta(s) de estudiante. Copia las credenciales antes de salir de esta página.', 'success')
