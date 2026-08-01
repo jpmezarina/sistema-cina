@@ -264,6 +264,7 @@ a:hover { color: var(--teal-dark); }
             <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' }}" href="{{ url_for('admin_dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Panel Admin</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'admin_codigos' }}" href="{{ url_for('admin_codigos') }}"><i class="bi bi-key-fill me-2"></i>Códigos de Acceso</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'admin_usuarios' }}" href="{{ url_for('admin_usuarios') }}"><i class="bi bi-people-fill me-2"></i>Usuarios</a></li>
+            <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'admin_importar_estudiantes' }}" href="{{ url_for('admin_importar_estudiantes') }}"><i class="bi bi-upload me-2"></i>Importar Estudiantes</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'admin_asignar_turnos' }}" href="{{ url_for('admin_asignar_turnos') }}"><i class="bi bi-calendar-week me-2"></i>Asignar Turnos</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'admin_asignar_tutores' }}" href="{{ url_for('admin_asignar_tutores') }}"><i class="bi bi-person-check me-2"></i>Asignar Tutores</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.endpoint == 'asistencias' }}" href="{{ url_for('asistencias') }}"><i class="bi bi-clipboard-check me-2"></i>Asistencias</a></li>

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Importar Estudiantes - CINA{% endblock %}
+{% block page_title %}Importar Estudiantes en Bloque{% endblock %}
+{% block content %}
+<div class="card mb-3">
+    <div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-upload me-2"></i>Carga masiva de estudiantes</h5></div>
+    <div class="card-body">
+        <p>Esta acción crea una cuenta (usuario + clave) directamente para cada estudiante de la lista, sin que tengan que auto-registrarse.</p>
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="border rounded p-3 text-center">
+                    <div class="h4 mb-0">{{ total_en_lista }}</div>
+                    <small class="text-muted text-uppercase">En la lista</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="border rounded p-3 text-center">
+                    <div class="h4 mb-0 text-success">{{ ya_existentes }}</div>
+                    <small class="text-muted text-uppercase">Ya creados</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="border rounded p-3 text-center">
+                    <div class="h4 mb-0 text-primary">{{ total_en_lista - ya_existentes }}</div>
+                    <small class="text-muted text-uppercase">Por crear ahora</small>
+                </div>
+            </div>
+        </div>
+
+        {% if total_en_lista - ya_existentes > 0 %}
+        <form method="POST">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-people-fill me-2"></i>Crear {{ total_en_lista - ya_existentes }} cuenta(s) ahora
+            </button>
+        </form>
+        {% else %}
+        <div class="alert alert-info mb-0">Todos los estudiantes de la lista ya tienen cuenta creada.</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white"><h5 class="mb-0">Lista actual ({{ lista|length }})</h5></div>
+    <div class="card-body">
+        <div class="row g-1">
+            {% for nombre in lista %}
+            <div class="col-md-4 col-lg-3"><small>{{ loop.index }}. {{ nombre }}</small></div>
+            {% endfor %}
+        </div>
+        <p class="text-muted small mt-3 mb-0">¿Necesitas editar esta lista? Se edita en <code>app.py</code>, la variable <code>ESTUDIANTES_IMPORTAR</code>.</p>
+    </div>
+</div>
+{% endblock %}

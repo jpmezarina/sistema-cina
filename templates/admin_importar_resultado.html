@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Credenciales Generadas - CINA{% endblock %}
+{% block page_title %}Credenciales de Estudiantes{% endblock %}
+{% block content %}
+{% if creados %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <strong>Guarda esta información ahora.</strong> Las claves no se pueden volver a mostrar después de salir de esta página
+    (se guardan cifradas). Descárgalas o cópialas antes de continuar.
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">{{ creados|length }} cuenta(s) creada(s)</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="descargarCSV()"><i class="bi bi-download me-1"></i>Descargar CSV</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Imprimir</button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="tablaCredenciales">
+                <thead><tr><th>#</th><th>Apellidos</th><th>Usuario</th><th>Clave</th></tr></thead>
+                <tbody>
+                    {% for c in creados %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ c.apellidos }}</td>
+                        <td><code>{{ c.codigo }}</code></td>
+                        <td><code>{{ c.password }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function descargarCSV() {
+    const filas = [['apellidos', 'codigo', 'password']];
+    document.querySelectorAll('#tablaCredenciales tbody tr').forEach(tr => {
+        const celdas = tr.querySelectorAll('td');
+        filas.push([celdas[1].innerText, celdas[2].innerText, celdas[3].innerText]);
+    });
+    const csv = filas.map(f => f.map(v => `"${v}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'credenciales_estudiantes.csv';
+    link.click();
+}
+</script>
+{% else %}
+<div class="alert alert-info">No se creó ninguna cuenta nueva (todas ya existían).</div>
+{% endif %}
+
+<a href="{{ url_for('admin_importar_estudiantes') }}" class="btn btn-outline-secondary mt-3"><i class="bi bi-arrow-left me-2"></i>Volver</a>
+{% endblock %}
